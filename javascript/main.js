@@ -111,6 +111,10 @@ map.addControl(nav, 'top-left');
 const scale = new mapboxgl.ScaleControl();
 map.addControl(scale);
 
+const currentTileCoordinatesDiv = document.getElementById('currentTileCoordinates');
+const currentCoordinatesDiv = document.getElementById('currentCoordinates');
+const harvestInfoDiv = document.getElementById('harvestInfo');
+
 map.on('mousemove', (e) => {
     const converted = toMercator(point([e.lngLat.lng,e.lngLat.lat]));
     if(anchor){
@@ -118,15 +122,8 @@ map.on('mousemove', (e) => {
         selectionGeoJSON.geometry.coordinates = rectangle;
         map.getSource('selection').setData(selectionGeoJSON);
     }
-    document.getElementById('info').innerHTML =
-    JSON.stringify(mercatorToTileXY(converted.geometry.coordinates)) +
-    '<br/>' +
-    // e.lngLat is the longitude, latitude geographical position of the event
-    JSON.stringify(e.lngLat.wrap()) +
-    '<br/>' +
-    anchor
-    '<br/>' +
-    rectangle;
+    currentTileCoordinatesDiv.innerHTML = JSON.stringify(mercatorToTileXY(converted.geometry.coordinates));
+    currentCoordinatesDiv.innerHTML = JSON.stringify(e.lngLat.wrap());
 });
 
 map.on('click', (e) => {
@@ -156,8 +153,8 @@ map.on('click', (e) => {
         const tilesRectangle = makeRectangle(point1, point2);
         selectionTilesGeoJSON.geometry.coordinates = tilesRectangle;
         map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
-        console.log("harvest " + ((bottomRightTileX -topLeftTileX) * (bottomRightTileY - topLeftTileY ) / 4)  + " tiles");
         // TODO call the harvest API
+        harvestInfoDiv.innerHTML = "harvest " + ((bottomRightTileX -topLeftTileX) * (bottomRightTileY - topLeftTileY)) + " 512 x 512 tiles ";
         // clear the selection
         rectangle = [];
         selectionGeoJSON.geometry.coordinates = rectangle;
