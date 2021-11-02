@@ -103,7 +103,8 @@ let map = new mapboxgl.Map({
     zoom: 12, // starting zoom
     hash: true,
     minZoom: 0,
-    maxZoom: 18
+    maxZoom: 18,
+    antialias: true
 });
 
 const nav = new mapboxgl.NavigationControl();
@@ -125,6 +126,14 @@ map.on('mousemove', (e) => {
     currentTileCoordinatesDiv.innerHTML = JSON.stringify(mercatorToTileXY(converted.geometry.coordinates));
     currentCoordinatesDiv.innerHTML = JSON.stringify(e.lngLat.wrap());
 });
+
+const dummyAPIcall = (X, Y) => {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            console.log("harvesting X: " + X + "; Y: " + Y);
+        }, Math.floor(Math.random() * 5000))
+    })
+}
 
 map.on('click', (e) => {
     if(!anchor){
@@ -153,8 +162,15 @@ map.on('click', (e) => {
         const tilesRectangle = makeRectangle(point1, point2);
         selectionTilesGeoJSON.geometry.coordinates = tilesRectangle;
         map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
-        // TODO call the harvest API
+        // iterate over the selection, skipping a tile in each direction and call the api for each
         harvestInfoDiv.innerHTML = "harvest " + ((bottomRightTileX -topLeftTileX) * (bottomRightTileY - topLeftTileY)) + " 512 x 512 tiles ";
+        for (let i = topLeftTileX; i < bottomRightTileX; i = i + 2){
+            for (let j = topLeftTileY; j < bottomRightTileY; j = j + 2){
+                // replace with actual API call
+                //console.log("harvesting X: " + i + "; Y: " + j);
+                dummyAPIcall(i,j);
+            }
+        }
         // clear the selection
         rectangle = [];
         selectionGeoJSON.geometry.coordinates = rectangle;
