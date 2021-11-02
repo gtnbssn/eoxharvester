@@ -65,9 +65,7 @@ let map = new mapboxgl.Map({
         {
             'id': 'cloudless2020',
             'type': 'raster',
-            'source': 'EOX-cloudless',
-            'minzoom': 0,
-            'maxzoom': 18
+            'source': 'EOX-cloudless'
         },
         {
             'id': 'selection',
@@ -103,11 +101,14 @@ let map = new mapboxgl.Map({
     },
     center: [-80.5, 7.5], // starting position
     zoom: 12, // starting zoom
-    hash: true
+    hash: true,
+    minZoom: 0,
+    maxZoom: 18
 });
-let nav = new mapboxgl.NavigationControl();
+
+const nav = new mapboxgl.NavigationControl();
 map.addControl(nav, 'top-left');
-let scale = new mapboxgl.ScaleControl();
+const scale = new mapboxgl.ScaleControl();
 map.addControl(scale);
 
 map.on('mousemove', (e) => {
