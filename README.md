@@ -11,7 +11,5 @@ To check out a build:
 
 # TODO
 
-So far this only does the math to properly select the tile positions.
-I have the code to fetch and stitch the tiles.
-Still need to deploy it to a serverless function and implement the API in there.
-
+- make it look better, the css is in assets, we can add more divs in the index.html, i am selecting them by id in the js to update the info
+- it is now fetching from an API on google cloud, the API is just a dummy, i will add the code there soon
