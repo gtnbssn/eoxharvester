@@ -133,15 +133,20 @@ map.on('click', (e) => {
     if(!anchor){
         anchor = e.lngLat;
     }else{
-        // mark the actual area to harvest, even tiles only
+        // mark the actual area to harvest, we want an even number of tiles on both axis
+        // get the tile positions from the coordinates of our rectangle
         let {tileX: topLeftTileX, tileY: topLeftTileY} = mercatorToTileXY(toMercator(point(rectangle[0][0])).geometry.coordinates);
         let {tileX: bottomRightTileX, tileY: bottomRightTileY} = mercatorToTileXY(toMercator(point(rectangle[0][2])).geometry.coordinates);
+        // if we have selected only 1 tile in one of the directions, make it 2
         if(topLeftTileX == bottomRightTileX){bottomRightTileX = bottomRightTileX + 1};
         if(topLeftTileY == bottomRightTileY){bottomRightTileY = bottomRightTileY + 1};
-        if(topLeftTileX % 2 == 1){topLeftTileX = topLeftTileX - 1};
-        if(topLeftTileY % 2 == 1){topLeftTileY = topLeftTileY - 1};
-        if(bottomRightTileX % 2 == 1){bottomRightTileX = bottomRightTileX + 1}else{bottomRightTileX = bottomRightTileX + 2};
-        if(bottomRightTileY % 2 == 1){bottomRightTileY = bottomRightTileY + 1}else{bottomRightTileY = bottomRightTileY + 2};
+        // because the coordinates are the top left corner of a tile, we want to add 1 to the bottom right corner on top of other adjustments
+        // if the number of tiles in one of the directions is odd, add 2 tiles in this direction
+        // if the number is even, only add one tile, to include the bottom right tile
+        // the number of tiles is EVEN when top left - bottom right is ODD
+        // 10 - 8 = 2, means we have tiles 10, 9 and 8
+        if((topLeftTileX - bottomRightTileX) % 2 == 0){bottomRightTileX = bottomRightTileX + 2}else{bottomRightTileX = bottomRightTileX + 1};
+        if((topLeftTileY - bottomRightTileY) % 2 == 0){bottomRightTileY = bottomRightTileY + 2}else{bottomRightTileY = bottomRightTileY + 1};
         const {lng: topLeftTileLng, lat: topLeftTileLat} = tileXYToMercator(topLeftTileX, topLeftTileY);
         const coords1 = getCoord(toWgs84(point([topLeftTileLng, topLeftTileLat])));
         const point1 = {lng: coords1[0], lat: coords1[1]};
