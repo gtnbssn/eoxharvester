@@ -1,0 +1,16 @@
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+#info {
+    display: block;
+    position: relative;
+    margin-left: auto;
+    margin-right: 0;
+    width: 50%;
+    padding: 10px;
+    border: none;
+    border-bottom-left-radius: 3px;
+    font-size: 12px;
+    text-align: center;
+    color: #222;
+    background: #fff;
+}

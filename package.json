@@ -1,0 +1,16 @@
+{
+  "name": "eoxharvester",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^2.6.4"
+  },
+  "dependencies": {
+    "@turf/turf": "^6.5.0",
+    "mapbox-gl": "^1.13.2"
+  }
+}
