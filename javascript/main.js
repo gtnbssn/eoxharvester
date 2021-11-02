@@ -32,7 +32,14 @@ let map = new mapboxgl.Map({
             'EOX-cloudless': {
                 'type': 'raster',
                 'tiles': [
-                    'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'
+                    'https://a.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://b.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://c.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://d.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://e.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://f.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://g.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg',
+                    'https://h.tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2020_3857/default/GoogleMapsCompatible/{z}/{y}/{x}.jpg'
                 ],
                 'tileSize': 256,
                 'attribution':
@@ -168,7 +175,21 @@ map.on('click', (e) => {
             for (let j = topLeftTileY; j < bottomRightTileY; j = j + 2){
                 // replace with actual API call
                 //console.log("harvesting X: " + i + "; Y: " + j);
-                dummyAPIcall(i,j);
+                //dummyAPIcall(i,j);
+                fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/harvestAndStitchFromEOX',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({tileX: i, tileY: j})
+                    }
+                ).then(
+                    (res) => {return res.text();}
+                ).then(
+                    (resText) => {console.log(resText);}
+                )
+                ;
             }
         }
         // clear the selection
