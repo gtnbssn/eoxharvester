@@ -119,11 +119,56 @@ map.addControl(nav, 'top-left');
 const scale = new mapboxgl.ScaleControl();
 map.addControl(scale);
 
+const setZoomButton = document.getElementById('setZoom');
 const currentTileCoordinatesDiv = document.getElementById('currentTileCoordinates');
 const currentCoordinatesDiv = document.getElementById('currentCoordinates');
 const harvestInfoDiv = document.getElementById('harvestInfo');
+const triggerHarvestButton = document.getElementById('triggerHarvest');
+const cancelHarvestButton = document.getElementById('cancelHarvest');
+const tagSelector = document.getElementById('tags');
 
-map.on('mousemove', (e) => {
+let selectionBoundsXYtiles = [];
+let selectedTag = "other";
+
+setZoomButton.addEventListener('click', (e) => {map.setZoom(12)});
+tagSelector.addEventListener('change', (e) => {
+    selectedTag = e.target.value;
+    console.log(selectedTag);
+});
+
+const harvest = (topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY) => {
+    for (let i = topLeftTileX; i < bottomRightTileX; i = i + 2){
+        for (let j = topLeftTileY; j < bottomRightTileY; j = j + 2){
+            fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/harvester',
+            //fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/dummyharvester',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({tileX: i, tileY: j, tag: selectedTag})
+                }
+            ).then(
+                (res) => {return res.text();}
+            ).then(
+                (result) => {console.log(result);}
+            )
+            ;
+        }
+    }
+    harvestInfoDiv.innerHTML = "";
+};
+
+triggerHarvestButton.addEventListener('click', (e) => {harvest(...selectionBoundsXYtiles)});
+
+cancelHarvestButton.addEventListener('click', (e) => {
+    selectionBoundsXYtiles = [];
+    selectionTilesGeoJSON.geometry.coordinates = [];
+    map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
+    harvestInfoDiv.innerHTML = "";
+});
+
+const updateOnMouseMove = (e) => {
     const converted = toMercator(point([e.lngLat.lng,e.lngLat.lat]));
     if(anchor){
         rectangle = makeRectangle(e.lngLat, anchor);
@@ -132,15 +177,9 @@ map.on('mousemove', (e) => {
     }
     currentTileCoordinatesDiv.innerHTML = JSON.stringify(mercatorToTileXY(converted.geometry.coordinates));
     currentCoordinatesDiv.innerHTML = JSON.stringify(e.lngLat.wrap());
-});
+};
 
-const dummyAPIcall = (X, Y) => {
-    return new Promise(resolve => {
-        setTimeout(() => {
-            console.log("harvesting X: " + X + "; Y: " + Y);
-        }, Math.floor(Math.random() * 5000))
-    })
-}
+map.on('mousemove', updateOnMouseMove);
 
 map.on('click', (e) => {
     if(!anchor){
@@ -160,6 +199,12 @@ map.on('click', (e) => {
         // 10 - 8 = 2, means we have tiles 10, 9 and 8
         if((topLeftTileX - bottomRightTileX) % 2 == 0){bottomRightTileX = bottomRightTileX + 2}else{bottomRightTileX = bottomRightTileX + 1};
         if((topLeftTileY - bottomRightTileY) % 2 == 0){bottomRightTileY = bottomRightTileY + 2}else{bottomRightTileY = bottomRightTileY + 1};
+        // constrain the selection to a 12x12 square
+        // we should harvest a maximum of 144 tiles per query (36 1024x1024 tiles)
+        // this is to avoid overloading the EOX server
+        if((bottomRightTileX - topLeftTileX )>12){ bottomRightTileX = topLeftTileX + 12 };
+        if((bottomRightTileY - topLeftTileY )>12){ bottomRightTileY = topLeftTileY + 12 };
+        selectionBoundsXYtiles = [topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY];
         const {lng: topLeftTileLng, lat: topLeftTileLat} = tileXYToMercator(topLeftTileX, topLeftTileY);
         const coords1 = getCoord(toWgs84(point([topLeftTileLng, topLeftTileLat])));
         const point1 = {lng: coords1[0], lat: coords1[1]};
@@ -170,28 +215,7 @@ map.on('click', (e) => {
         selectionTilesGeoJSON.geometry.coordinates = tilesRectangle;
         map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
         // iterate over the selection, skipping a tile in each direction and call the api for each
-        harvestInfoDiv.innerHTML = "harvest " + ((bottomRightTileX -topLeftTileX) * (bottomRightTileY - topLeftTileY)) + " 512 x 512 tiles ";
-        for (let i = topLeftTileX; i < bottomRightTileX; i = i + 2){
-            for (let j = topLeftTileY; j < bottomRightTileY; j = j + 2){
-                // replace with actual API call
-                //console.log("harvesting X: " + i + "; Y: " + j);
-                //dummyAPIcall(i,j);
-                fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/harvestAndStitchFromEOX',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({tileX: i, tileY: j})
-                    }
-                ).then(
-                    (res) => {return res.text();}
-                ).then(
-                    (resText) => {console.log(resText);}
-                )
-                ;
-            }
-        }
+        harvestInfoDiv.innerHTML = "selection: " + ((bottomRightTileX -topLeftTileX) * (bottomRightTileY - topLeftTileY)) / 4 + " 1024 x 1024 tiles";
         // clear the selection
         rectangle = [];
         selectionGeoJSON.geometry.coordinates = rectangle;

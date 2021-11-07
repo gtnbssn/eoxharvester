@@ -9,9 +9,22 @@
   <body>
     <div id="map"></div>
     <div id="info">
+        <button id="setZoom">Set zoom to harvest level</button>
         <div id="currentTileCoordinates"></div> 
         <div id="currentCoordinates"></div>
         <div id="harvestInfo"></div>
+        <label for="tags">Tag:</label>
+        <select name="tags" id="tags">
+            <option value="forest">Forest</option>
+            <option value="desert">Desert</option>
+            <option value="Mountain">Mountain</option>
+            <option value="coast">Coast and Islands</option>
+            <option value="city">City</option>
+            <option value="industrial">Industrial</option>
+            <option value="other" selected>Other</option>
+        </select>
+        <button id="triggerHarvest">Harvest</button>
+        <button id="cancelHarvest">Cancel</button>
     </div>
     <script type="module" src="/javascript/main.js"></script>
   </body>
