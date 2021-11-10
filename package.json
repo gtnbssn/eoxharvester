@@ -7,10 +7,14 @@
     "serve": "vite preview"
   },
   "devDependencies": {
+    "@types/events": "^3.0.0",
+    "@types/node": "^16.11.7",
     "vite": "^2.6.4"
   },
   "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^4.7.4",
     "@turf/turf": "^6.5.0",
+    "events": "^3.3.0",
     "mapbox-gl": "^1.13.2"
   }
 }

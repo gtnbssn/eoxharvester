@@ -2,11 +2,13 @@ import * as mapboxgl from 'mapbox-gl'
 import { toMercator, toWgs84 } from '@turf/projection'
 import { point } from '@turf/helpers'
 import { getCoord } from '@turf/invariant'
+import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
 import { mercatorToTileXY, tileXYToMercator, makeRectangle } from './helpers.js'
 
 import '../assets/style.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 let anchor = null;
 let rectangle = null;
@@ -30,6 +32,7 @@ let harvestedTilesGeoJSON = {
     'coordinates' : harvestedTilesCoordinates
 };
 let map = new mapboxgl.Map({
+    accessToken: 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q',
     container: 'map', // container id
     style: {
         'version': 8,
@@ -133,6 +136,14 @@ let map = new mapboxgl.Map({
     antialias: true
 });
 
+mapboxgl.accessToken = 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q';
+const geocoder = new MapboxGeocoder({
+    accessToken: mapboxgl.accessToken,
+    mapboxgl: mapboxgl,
+    zoom: 12
+})
+map.addControl(geocoder,'top-left');
+
 const nav = new mapboxgl.NavigationControl();
 map.addControl(nav, 'top-left');
 const scale = new mapboxgl.ScaleControl();
@@ -159,7 +170,6 @@ resetPitchAndBearingButton.addEventListener('click', (e) => {
 });
 tagSelector.addEventListener('change', (e) => {
     selectedTag = e.target.value;
-    console.log(selectedTag);
 });
 
 const harvest = (topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY) => {
