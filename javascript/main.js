@@ -139,6 +139,7 @@ const scale = new mapboxgl.ScaleControl();
 map.addControl(scale);
 
 const setZoomButton = document.getElementById('setZoom');
+const resetPitchAndBearingButton = document.getElementById('resetPitchAndBearing');
 const currentTileCoordinatesDiv = document.getElementById('currentTileCoordinates');
 const currentCoordinatesDiv = document.getElementById('currentCoordinates');
 const harvestInfoDiv = document.getElementById('harvestInfo');
@@ -152,6 +153,10 @@ let selectionBoundsXYtiles = [];
 let selectedTag = "other";
 
 setZoomButton.addEventListener('click', (e) => {map.setZoom(12)});
+resetPitchAndBearingButton.addEventListener('click', (e) => {
+    map.setPitch(0);
+    map.setBearing(0);
+});
 tagSelector.addEventListener('change', (e) => {
     selectedTag = e.target.value;
     console.log(selectedTag);
