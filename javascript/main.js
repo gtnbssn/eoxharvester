@@ -24,6 +24,11 @@ let selectionTilesGeoJSON = {
         'coordinates': []
     }
 };
+let harvestedTilesCoordinates = [];
+let harvestedTilesGeoJSON = {
+    'type': 'MultiPolygon',
+    'coordinates' : harvestedTilesCoordinates
+};
 let map = new mapboxgl.Map({
     container: 'map', // container id
     style: {
@@ -67,6 +72,10 @@ let map = new mapboxgl.Map({
                 'type': 'geojson',
                 'data': selectionTilesGeoJSON
             },
+            'harvestedTiles': {
+                'type': 'geojson',
+                'data': harvestedTilesGeoJSON
+            },
         },
         'layers': [
         {
@@ -92,6 +101,16 @@ let map = new mapboxgl.Map({
             'paint': {
                 'fill-color': '#0EE',
                 'fill-opacity': 0.8
+                }
+        },
+        {
+            'id': 'harvestedTiles',
+            'type': 'fill',
+            'source': 'harvestedTiles',
+            'layout': {},
+            'paint': {
+                'fill-color': '#EEE',
+                'fill-opacity': 0.4
                 }
         },
         {
@@ -126,6 +145,8 @@ const harvestInfoDiv = document.getElementById('harvestInfo');
 const triggerHarvestButton = document.getElementById('triggerHarvest');
 const cancelHarvestButton = document.getElementById('cancelHarvest');
 const tagSelector = document.getElementById('tags');
+const contentListUL = document.getElementById("contentList");
+const updateCountButton = document.getElementById('updateCount');
 
 let selectionBoundsXYtiles = [];
 let selectedTag = "other";
@@ -151,22 +172,52 @@ const harvest = (topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY)
             ).then(
                 (res) => {return res.text();}
             ).then(
-                (result) => {console.log(result);}
-            )
-            ;
+                (result) => {
+                    //make rectangle and append it to the coordinates array
+                    const topLeft = tileXYToMercator(i, j);
+                    const coordsTopLeft = getCoord(toWgs84(point([topLeft.lng, topLeft.lat])));
+                    const point1 = {lng: coordsTopLeft[0], lat: coordsTopLeft[1]};
+                    const bottomRight = tileXYToMercator(i+2, j+2);
+                    const coordsBottomRight = getCoord(toWgs84(point([bottomRight.lng, bottomRight.lat])));
+                    const point2 = {lng: coordsBottomRight[0], lat: coordsBottomRight[1]};
+                    harvestedTilesCoordinates.push(makeRectangle(point1, point2));
+                    harvestedTilesGeoJSON.coordinates = harvestedTilesCoordinates;
+                    map.getSource('harvestedTiles').setData(harvestedTilesGeoJSON);
+                    console.log(result);
+                }
+            );
         }
     }
-    harvestInfoDiv.innerHTML = "";
+    clearSelection();
 };
 
-triggerHarvestButton.addEventListener('click', (e) => {harvest(...selectionBoundsXYtiles)});
+const updateTotalPerCategory = () => {
+    fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/countContentPerTag')
+    .then((res) => {return res.json();}
+    ).then(
+        (json) => {
+            contentListUL.innerHTML = "";
+            Object.entries(json).map(([key,value]) => {
+                contentListUL.appendChild(document.createElement("li")).innerHTML = key + ": " + value;
+            })
+        }
+    );
+}
 
-cancelHarvestButton.addEventListener('click', (e) => {
+export const clearSelection = () => {
     selectionBoundsXYtiles = [];
     selectionTilesGeoJSON.geometry.coordinates = [];
     map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
     harvestInfoDiv.innerHTML = "";
-});
+}
+
+updateCountButton.addEventListener('click', (e) => updateTotalPerCategory());
+
+document.addEventListener("DOMContentLoaded", updateTotalPerCategory);
+
+triggerHarvestButton.addEventListener('click', (e) => {harvest(...selectionBoundsXYtiles)});
+
+cancelHarvestButton.addEventListener('click', (e) => clearSelection());
 
 const updateOnMouseMove = (e) => {
     const converted = toMercator(point([e.lngLat.lng,e.lngLat.lat]));
