@@ -164,10 +164,7 @@ let selectionBoundsXYtiles = [];
 let selectedTag = "other";
 
 setZoomButton.addEventListener('click', (e) => {map.setZoom(12)});
-resetPitchAndBearingButton.addEventListener('click', (e) => {
-    map.setPitch(0);
-    map.setBearing(0);
-});
+resetPitchAndBearingButton.addEventListener('click', (e) => {map.resetNorthPitch()});
 tagSelector.addEventListener('change', (e) => {
     selectedTag = e.target.value;
 });
