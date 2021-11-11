@@ -10,6 +10,7 @@ import '../assets/style.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
+const accessToken = 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q';
 let anchor = null;
 let rectangle = null;
 let selectionGeoJSON = {
@@ -31,9 +32,16 @@ let harvestedTilesGeoJSON = {
     'type': 'MultiPolygon',
     'coordinates' : harvestedTilesCoordinates
 };
-let map = new mapboxgl.Map({
-    accessToken: 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q',
+const map = new mapboxgl.Map({
+    accessToken: accessToken,
     container: 'map', // container id
+    center: [-80.5, 7.5], // starting position
+    zoom: 12, // starting zoom
+    hash: true,
+    minZoom: 0,
+    maxZoom: 14,
+    maxPitch: 85,
+    antialias: true,
     style: {
         'version': 8,
         'sources': {
@@ -52,6 +60,12 @@ let map = new mapboxgl.Map({
                 'tileSize': 256,
                 'attribution':
                 '<a xmlns:cc="http://creativecommons.org/ns#" href="https://eox.at" property="cc:attributionName" rel="cc:attributionURL">EOX IT Services GmbH</a> (Contains modified Copernicus Sentinel data 2020) released under <a rel="license" href="https://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>. For commercial usage please see <a href="https://cloudless.eox.at">https://cloudless.eox.at</a>'
+            },
+            'mapbox-dem': {
+                'type': 'raster-dem',
+                'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                'tileSize': 512,
+                'maxzoom': 14
             },
             'selection': {
                 'type': 'geojson',
@@ -126,19 +140,12 @@ let map = new mapboxgl.Map({
                 'line-width': 5
                 }
         }
-        ]
-    },
-    center: [-80.5, 7.5], // starting position
-    zoom: 12, // starting zoom
-    hash: true,
-    minZoom: 0,
-    maxZoom: 18,
-    antialias: true
+        ],
+        'terrain' : { 'source': 'mapbox-dem', 'exaggeration': 1.5 }
+    }
 });
-
-mapboxgl.accessToken = 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q';
 const geocoder = new MapboxGeocoder({
-    accessToken: mapboxgl.accessToken,
+    accessToken: accessToken,
     mapboxgl: mapboxgl,
     zoom: 12
 })
@@ -216,7 +223,7 @@ const updateTotalPerCategory = () => {
     );
 }
 
-export const clearSelection = () => {
+const clearSelection = () => {
     selectionBoundsXYtiles = [];
     selectionTilesGeoJSON.geometry.coordinates = [];
     map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
