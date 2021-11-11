@@ -9,7 +9,13 @@ Start the dev server:
 To check out a build:
 `npm run build`
 
-# TODO
+# CAUTION LIVE FIRING AREA
 
-- make it look better, the css is in assets, we can add more divs in the index.html, i am selecting them by id in the js to update the info
-- it is now fetching from an API on google cloud, the API is just a dummy, i will add the code there soon
+This page will make requests to the relevant google cloud function to process and save images.
+
+This won't work as CORS will only allow requests made from the right domain.
+
+To test locally, comment line 178 and uncomment line 179 in javascript/main.js.
+
+This will instead query a dummy cloud function that allows requests from all origins but does not save any data.
+
