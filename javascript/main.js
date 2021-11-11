@@ -139,7 +139,16 @@ const map = new mapboxgl.Map({
                 'line-color': '#F00',
                 'line-width': 5
                 }
-        }
+        },
+        {
+            'id': 'sky',
+            'type': 'sky',
+            'paint': {
+                'sky-type': 'atmosphere',
+                'sky-atmosphere-sun': [0.0, 0.0],
+                'sky-atmosphere-sun-intensity': 15
+            }
+        },
         ],
         'terrain' : { 'source': 'mapbox-dem', 'exaggeration': 1.5 }
     }
