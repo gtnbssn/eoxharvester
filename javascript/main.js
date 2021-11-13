@@ -247,6 +247,16 @@ triggerHarvestButton.addEventListener('click', (e) => {harvest(...selectionBound
 
 cancelHarvestButton.addEventListener('click', (e) => clearSelection());
 
+document.addEventListener('keypress', (e) => {
+    if (e.code == "KeyC") {
+        clearSelection();
+    }else if(e.code == "KeyH") {
+        harvest(...selectionBoundsXYtiles);
+    }else if(e.code == "KeyU") {
+        updateTotalPerCategory();
+    }
+});
+
 const updateOnMouseMove = (e) => {
     const converted = toMercator(point([e.lngLat.lng,e.lngLat.lat]));
     if(anchor){
