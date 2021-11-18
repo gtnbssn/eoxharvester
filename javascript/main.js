@@ -1,4 +1,4 @@
-import * as mapboxgl from 'mapbox-gl'
+import mapboxgl from 'mapbox-gl'
 import { toMercator, toWgs84 } from '@turf/projection'
 import { point } from '@turf/helpers'
 import { getCoord } from '@turf/invariant'
@@ -8,7 +8,7 @@ import { mercatorToTileXY, tileXYToMercator, makeRectangle } from './helpers.js'
 
 import '../assets/style.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
-import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
+import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 
 const accessToken = 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q';
 let anchor = null;
@@ -177,25 +177,22 @@ const contentListUL = document.getElementById("contentList");
 const updateCountButton = document.getElementById('updateCount');
 
 let selectionBoundsXYtiles = [];
-let selectedTag = "other";
 
 setZoomButton.addEventListener('click', (e) => {map.setZoom(12)});
 resetPitchAndBearingButton.addEventListener('click', (e) => {map.resetNorthPitch()});
-tagSelector.addEventListener('change', (e) => {
-    selectedTag = e.target.value;
-});
 
-const harvest = (topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY) => {
+const harvest = (selectionBoundsXYtiles) => {
+    const [topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY] = selectionBoundsXYtiles;
     for (let i = topLeftTileX; i < bottomRightTileX; i = i + 2){
         for (let j = topLeftTileY; j < bottomRightTileY; j = j + 2){
-            fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/harvester',
-            //fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/dummyharvester',
+            //fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/harvester',
+            fetch('https://europe-west3-eoxharvest-7953f.cloudfunctions.net/dummyharvester',
                 {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({tileX: i, tileY: j, tag: selectedTag})
+                    body: JSON.stringify({tileX: i, tileY: j, tag: tagSelector.value})
                 }
             ).then(
                 (res) => {return res.text();}
@@ -236,14 +233,14 @@ const clearSelection = () => {
     selectionBoundsXYtiles = [];
     selectionTilesGeoJSON.geometry.coordinates = [];
     map.getSource('selectionTiles').setData(selectionTilesGeoJSON);
-    harvestInfoDiv.innerHTML = "";
+    harvestInfoDiv.innerHTML = "no selection";
 }
 
 updateCountButton.addEventListener('click', (e) => updateTotalPerCategory());
 
-document.addEventListener("DOMContentLoaded", updateTotalPerCategory);
+updateTotalPerCategory();
 
-triggerHarvestButton.addEventListener('click', (e) => {harvest(...selectionBoundsXYtiles)});
+triggerHarvestButton.addEventListener('click', (e) => {harvest(selectionBoundsXYtiles)});
 
 cancelHarvestButton.addEventListener('click', (e) => clearSelection());
 
@@ -251,9 +248,13 @@ document.addEventListener('keypress', (e) => {
     if (e.code == "KeyC") {
         clearSelection();
     }else if(e.code == "KeyH") {
-        harvest(...selectionBoundsXYtiles);
+        harvest(selectionBoundsXYtiles);
     }else if(e.code == "KeyU") {
         updateTotalPerCategory();
+    }else if(e.code == "KeyZ") {
+        map.setZoom(12);
+    }else if(e.code == "KeyR") {
+        map.resetNorthPitch();
     }
 });
 
@@ -265,7 +266,10 @@ const updateOnMouseMove = (e) => {
         map.getSource('selection').setData(selectionGeoJSON);
     }
     currentTileCoordinatesDiv.innerHTML = JSON.stringify(mercatorToTileXY(converted.geometry.coordinates));
-    currentCoordinatesDiv.innerHTML = JSON.stringify(e.lngLat.wrap());
+    currentCoordinatesDiv.innerHTML = "lng: "
+        + (Math.round(e.lngLat.wrap().lng * 100)/100).toFixed(2)
+        + " lat: "
+        + (Math.round(e.lngLat.wrap().lat * 100)/100).toFixed(2);
 };
 
 map.on('mousemove', updateOnMouseMove);
