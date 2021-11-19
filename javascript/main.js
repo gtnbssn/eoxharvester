@@ -1,10 +1,7 @@
 import mapboxgl from 'mapbox-gl'
-import { toMercator, toWgs84 } from '@turf/projection'
-import { point } from '@turf/helpers'
-import { getCoord } from '@turf/invariant'
 import MapboxGeocoder from '@mapbox/mapbox-gl-geocoder';
 
-import { mercatorToTileXY, tileXYToMercator, makeRectangle } from './helpers.js'
+import { tileXYToWGS84, WGS84ToTileXY, makeRectangle } from './helpers.js'
 
 import '../assets/style.css'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -148,7 +145,7 @@ const map = new mapboxgl.Map({
                 'sky-atmosphere-sun': [0.0, 0.0],
                 'sky-atmosphere-sun-intensity': 15
             }
-        },
+        }
         ],
         'terrain' : { 'source': 'mapbox-dem', 'exaggeration': 1.5 }
     }
@@ -199,12 +196,8 @@ const harvest = (selectionBoundsXYtiles) => {
             ).then(
                 (result) => {
                     //make rectangle and append it to the coordinates array
-                    const topLeft = tileXYToMercator(i, j);
-                    const coordsTopLeft = getCoord(toWgs84(point([topLeft.lng, topLeft.lat])));
-                    const point1 = {lng: coordsTopLeft[0], lat: coordsTopLeft[1]};
-                    const bottomRight = tileXYToMercator(i+2, j+2);
-                    const coordsBottomRight = getCoord(toWgs84(point([bottomRight.lng, bottomRight.lat])));
-                    const point2 = {lng: coordsBottomRight[0], lat: coordsBottomRight[1]};
+                    const point1 = tileXYToWGS84(i, j);
+                    const point2 = tileXYToWGS84(i+2, j+2);
                     harvestedTilesCoordinates.push(makeRectangle(point1, point2));
                     harvestedTilesGeoJSON.coordinates = harvestedTilesCoordinates;
                     map.getSource('harvestedTiles').setData(harvestedTilesGeoJSON);
@@ -259,13 +252,12 @@ document.addEventListener('keypress', (e) => {
 });
 
 const updateOnMouseMove = (e) => {
-    const converted = toMercator(point([e.lngLat.lng,e.lngLat.lat]));
     if(anchor){
         rectangle = makeRectangle(e.lngLat, anchor);
         selectionGeoJSON.geometry.coordinates = rectangle;
         map.getSource('selection').setData(selectionGeoJSON);
     }
-    currentTileCoordinatesDiv.innerHTML = JSON.stringify(mercatorToTileXY(converted.geometry.coordinates));
+    currentTileCoordinatesDiv.innerHTML = JSON.stringify(WGS84ToTileXY([e.lngLat.lng,e.lngLat.lat]));
     currentCoordinatesDiv.innerHTML = "lng: "
         + (Math.round(e.lngLat.wrap().lng * 100)/100).toFixed(2)
         + " lat: "
@@ -280,8 +272,8 @@ map.on('click', (e) => {
     }else{
         // mark the actual area to harvest, we want an even number of tiles on both axis
         // get the tile positions from the coordinates of our rectangle
-        let {tileX: topLeftTileX, tileY: topLeftTileY} = mercatorToTileXY(toMercator(point(rectangle[0][0])).geometry.coordinates);
-        let {tileX: bottomRightTileX, tileY: bottomRightTileY} = mercatorToTileXY(toMercator(point(rectangle[0][2])).geometry.coordinates);
+        let {tileX: topLeftTileX, tileY: topLeftTileY} = WGS84ToTileXY(rectangle[0][0]);
+        let {tileX: bottomRightTileX, tileY: bottomRightTileY} = WGS84ToTileXY(rectangle[0][2]);
         // if we have selected only 1 tile in one of the directions, make it 2
         if(topLeftTileX == bottomRightTileX){bottomRightTileX = bottomRightTileX + 1};
         if(topLeftTileY == bottomRightTileY){bottomRightTileY = bottomRightTileY + 1};
@@ -298,12 +290,8 @@ map.on('click', (e) => {
         if((bottomRightTileX - topLeftTileX )>12){ bottomRightTileX = topLeftTileX + 12 };
         if((bottomRightTileY - topLeftTileY )>12){ bottomRightTileY = topLeftTileY + 12 };
         selectionBoundsXYtiles = [topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY];
-        const {lng: topLeftTileLng, lat: topLeftTileLat} = tileXYToMercator(topLeftTileX, topLeftTileY);
-        const coords1 = getCoord(toWgs84(point([topLeftTileLng, topLeftTileLat])));
-        const point1 = {lng: coords1[0], lat: coords1[1]};
-        const {lng: bottomRightTileLng, lat: bottomRightTileLat} = tileXYToMercator(bottomRightTileX, bottomRightTileY);
-        const coords2 = getCoord(toWgs84(point([bottomRightTileLng, bottomRightTileLat])));
-        const point2 = {lng: coords2[0], lat: coords2[1]};
+        const point1 = tileXYToWGS84(topLeftTileX, topLeftTileY);
+        const point2 = tileXYToWGS84(bottomRightTileX, bottomRightTileY);
         const tilesRectangle = makeRectangle(point1, point2);
         selectionTilesGeoJSON.geometry.coordinates = tilesRectangle;
         map.getSource('selectionTiles').setData(selectionTilesGeoJSON);

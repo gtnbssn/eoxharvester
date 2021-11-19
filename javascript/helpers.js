@@ -1,14 +1,22 @@
-export const mercatorToTileXY = (pt) => {
+import { toMercator, toWgs84 } from '@turf/projection'
+import { point } from '@turf/helpers'
+import { getCoord } from '@turf/invariant'
+
+export const WGS84ToTileXY = (coordinates) => {
+    const mercatorCoordinates = getCoord(toMercator(point(coordinates)));
     return{
-        tileX : Math.floor((pt[0] + 20037508.342789) * 0.000102208),
-        tileY : Math.floor((20037508.342789 - pt[1]) * 0.000102208)
+        tileX : Math.floor((mercatorCoordinates[0] + 20037508.342789) * 0.000102208),
+        tileY : Math.floor((20037508.342789 - mercatorCoordinates[1]) * 0.000102208)
     };
 }
 
-export const tileXYToMercator = (tileX, tileY) => {
+export const tileXYToWGS84 = (tileX, tileY) => {
+    const mercatorLng = tileX / 0.000102208 - 20037508.342789;
+    const mercatorLat = 20037508.342789 - tileY / 0.000102208;
+    const coordinates = getCoord(toWgs84(point([mercatorLng, mercatorLat])));
     return{
-        lng: tileX / 0.000102208 - 20037508.342789,
-        lat: 20037508.342789 - tileY / 0.000102208
+        lng : coordinates[0],
+        lat : coordinates[1]
     };
 }
 
