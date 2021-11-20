@@ -10,6 +10,14 @@ import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css'
 const accessToken = 'pk.eyJ1IjoiZ3RuYnNzbiIsImEiOiJja3Z0cGhnMHgzZXk4Mm50a3Qwb3JvejBvIn0.9xnSTugMVAagxRx7imaL-Q';
 let anchor = null;
 let rectangle = null;
+let selectionBoundsXYtiles = [];
+
+const currentTileCoordinatesDiv = document.getElementById('currentTileCoordinates');
+const currentCoordinatesDiv = document.getElementById('currentCoordinates');
+const harvestInfoDiv = document.getElementById('harvestInfo');
+const tagSelector = document.getElementById('tags');
+const contentListUL = document.getElementById("contentList");
+
 let selectionGeoJSON = {
     'type': 'Feature',
     'geometry': {
@@ -29,11 +37,12 @@ let harvestedTilesGeoJSON = {
     'type': 'MultiPolygon',
     'coordinates' : harvestedTilesCoordinates
 };
+
 const map = new mapboxgl.Map({
     accessToken: accessToken,
-    container: 'map', // container id
-    center: [-80.5, 7.5], // starting position
-    zoom: 12, // starting zoom
+    container: 'map',
+    center: [-80.5, 7.5],
+    zoom: 12,
     hash: true,
     minZoom: 0,
     maxZoom: 14,
@@ -162,22 +171,6 @@ map.addControl(nav, 'top-left');
 const scale = new mapboxgl.ScaleControl();
 map.addControl(scale);
 
-const setZoomButton = document.getElementById('setZoom');
-const resetPitchAndBearingButton = document.getElementById('resetPitchAndBearing');
-const currentTileCoordinatesDiv = document.getElementById('currentTileCoordinates');
-const currentCoordinatesDiv = document.getElementById('currentCoordinates');
-const harvestInfoDiv = document.getElementById('harvestInfo');
-const triggerHarvestButton = document.getElementById('triggerHarvest');
-const cancelHarvestButton = document.getElementById('cancelHarvest');
-const tagSelector = document.getElementById('tags');
-const contentListUL = document.getElementById("contentList");
-const updateCountButton = document.getElementById('updateCount');
-
-let selectionBoundsXYtiles = [];
-
-setZoomButton.addEventListener('click', (e) => {map.setZoom(12)});
-resetPitchAndBearingButton.addEventListener('click', (e) => {map.resetNorthPitch()});
-
 const harvest = (selectionBoundsXYtiles) => {
     const [topLeftTileX, topLeftTileY, bottomRightTileX, bottomRightTileY] = selectionBoundsXYtiles;
     for (let i = topLeftTileX; i < bottomRightTileX; i = i + 2){
@@ -229,24 +222,29 @@ const clearSelection = () => {
     harvestInfoDiv.innerHTML = "no selection";
 }
 
-updateCountButton.addEventListener('click', (e) => updateTotalPerCategory());
-
 updateTotalPerCategory();
 
-triggerHarvestButton.addEventListener('click', (e) => {harvest(selectionBoundsXYtiles)});
+document.getElementById('setZoom').addEventListener('click', (e) => {map.setZoom(12)});
+document.getElementById('resetPitchAndBearing').addEventListener('click', (e) => {map.resetNorthPitch()});
+document.getElementById('updateCount').addEventListener('click', (e) => updateTotalPerCategory());
+document.getElementById('triggerHarvest').addEventListener('click', (e) => {harvest(selectionBoundsXYtiles)});
+document.getElementById('cancelHarvest').addEventListener('click', (e) => clearSelection());
 
-cancelHarvestButton.addEventListener('click', (e) => clearSelection());
-
-document.addEventListener('keypress', (e) => {
-    if (e.code == "KeyC") {
+document.addEventListener('keydown', (e) => {
+    if (e.keyCode == 67) {
+        //c
         clearSelection();
-    }else if(e.code == "KeyH") {
+    }else if(e.keyCode == 72) {
+        //h
         harvest(selectionBoundsXYtiles);
-    }else if(e.code == "KeyU") {
+    }else if(e.keyCode == 85) {
+        //u
         updateTotalPerCategory();
-    }else if(e.code == "KeyZ") {
+    }else if(e.keyCode == 90) {
+        //z
         map.setZoom(12);
-    }else if(e.code == "KeyR") {
+    }else if(e.keyCode == 82) {
+        //r
         map.resetNorthPitch();
     }
 });
