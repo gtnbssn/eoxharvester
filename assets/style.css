@@ -1,16 +1,130 @@
-body { margin: 0; padding: 0; }
-#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+body {
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+}
+
 #info {
     position: relative;
     float: right;
-    padding: 10px;
-    border-bottom-left-radius: 3px;
-    font-size: 12px;
-    text-align: right;
+    width: 300px;
+    height: auto;
+    margin: 10px;
+    padding: 13px;
+    border-radius: 5px;
+    box-shadow: 5px 10px 20px rgb(0 0 0 / 0.2);
+    font-size: 14px;
     color: #222;
-    background: #fff9;
-    font-family: sans;
+    background: rgb(255 255 255 / 0.8);
+    backdrop-filter: blur(20px) brightness(200%);
+    font-family: sans-serif;
+    text-align: center;
 }
-ul{
+
+#info button {
+    width: 100%;
+    height: 40px;
+    border: 1px solid rgb(0 0 0 / 0.15);
+    background: white;
+    font-size: 15px;
+}
+
+#info button:hover:enabled {
+    background: #fafafa;
+    cursor: pointer;
+}
+
+#setZoom {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom: none !important;
+}
+
+#resetPitchAndBearing {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin-bottom: 20px;
+}
+
+#triggerHarvest {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom: none !important;
+}
+
+#triggerHarvest:disabled {
+    cursor: not-allowed !important;
+}
+
+#triggerHarvest:enabled {
+    color: #1f67ff;
+}
+
+#triggerHarvest:hover:enabled {
+    color: white !important;
+    background-color: #1f67ff !important;
+    transition: all 0.3s;
+}
+
+#cancelHarvest:disabled {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin-bottom: 20px;
+    cursor: not-allowed !important;
+}
+
+#cancelHarvest:enabled {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    margin-bottom: 20px;
+    color: #ff2b61;
+}
+
+#cancelHarvest:hover:enabled {
+    color: white !important;
+    background-color: #ff2b61 !important;
+    transition: all 0.3s;
+}
+
+#updateCount {
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+#harvestInfo {
+    font-size: 13px;
+    font-style: italic;
+    color: #868686;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+#tags {
+    width: 100%;
+    height: 35px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
+.heading {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+ul {
     list-style: none;
+    text-align: left;
+    columns: 2;
+    -webkit-columns: 2;
+    -moz-columns: 2;
+    padding-inline: 5px;
+    margin-block: 10px;
 }
