@@ -119,7 +119,7 @@ body {
     margin-bottom: 15px;
 }
 
-ul {
+ul#contentList {
     list-style: none;
     text-align: left;
     columns: 2;
