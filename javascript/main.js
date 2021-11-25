@@ -12,6 +12,7 @@ const accessToken =
 let anchor = null;
 let rectangle = null;
 let selectionBoundsXYtiles = [];
+let selectionExists = false;
 
 const currentTileCoordinatesDiv = document.getElementById(
     'currentTileCoordinates'
@@ -19,6 +20,7 @@ const currentTileCoordinatesDiv = document.getElementById(
 const currentCoordinatesDiv = document.getElementById('currentCoordinates');
 const harvestInfoDiv = document.getElementById('harvestInfo');
 const tagSelector = document.getElementById('tags');
+const tagWarning = document.getElementById('tagWarning');
 const contentListUL = document.getElementById('contentList');
 
 let selectionGeoJSON = {
@@ -241,6 +243,7 @@ const clearSelection = () => {
     // disable harvest and clear buttons
     document.getElementById('triggerHarvest').disabled = true;
     document.getElementById('cancelHarvest').disabled = true;
+    selectionExists = false;
 };
 
 updateTotalPerCategory();
@@ -287,6 +290,7 @@ const updateOnMouseMove = (e) => {
         rectangle = makeRectangle(e.lngLat, anchor);
         selectionGeoJSON.geometry.coordinates = rectangle;
         map.getSource('selection').setData(selectionGeoJSON);
+        selectionExists = true;
     }
     currentTileCoordinatesDiv.innerHTML = JSON.stringify(
         WGS84ToTileXY([e.lngLat.lng, e.lngLat.lat])
@@ -359,9 +363,17 @@ map.on('click', (e) => {
                 (bottomRightTileY - topLeftTileY)) /
                 4 +
             ' Tiles (1024 x 1024) Selected';
-        // enable harvest and clear buttons
-        document.getElementById('triggerHarvest').disabled = false;
-        document.getElementById('cancelHarvest').disabled = false;
+        // enable harvest and clear buttons if tag is set
+        if (tagSelector.value != '') {
+            document.getElementById('triggerHarvest').disabled = false;
+            document.getElementById('cancelHarvest').disabled = false;
+            tagWarning.classList.remove('tag-warning');
+            tagWarning.innerHTML = '';
+        } else {
+            tagWarning.classList.add('tag-warning');
+            tagWarning.innerHTML =
+                '&#9650 Select a tag before harvesting tiles.';
+        }
         // clear the selection
         rectangle = [];
         selectionGeoJSON.geometry.coordinates = rectangle;
@@ -369,3 +381,14 @@ map.on('click', (e) => {
         anchor = null;
     }
 });
+
+// remove warning if harvest selection exists and tag already set
+
+tagSelector.onchange = function (e) {
+    if (selectionExists) {
+        document.getElementById('triggerHarvest').disabled = false;
+        document.getElementById('cancelHarvest').disabled = false;
+        tagWarning.classList.remove('tag-warning');
+        tagWarning.innerHTML = '';
+    }
+};
