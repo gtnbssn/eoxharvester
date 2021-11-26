@@ -4,14 +4,18 @@
         <meta charset="UTF-8" />
         <link rel="icon" type="image/svg+xml" href="favicon.svg" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Ground Control EOX Harvester</title>
+        <title>Ground Control | EOX Harvester</title>
     </head>
     <body>
         <div id="map"></div>
         <div id="info">
             <div class="heading">View Controls</div>
-            <button id="setZoom">Set Zoom to Harvest Level</button>
-            <button id="resetPitchAndBearing">Reset Pitch and Bearing</button>
+            <button class="info-button" id="setZoom">
+                Set Zoom to Harvest Level
+            </button>
+            <button class="info-button" id="resetPitchAndBearing">
+                Reset Pitch and Bearing
+            </button>
             <div class="heading">Tile Details</div>
             <div id="currentTileCoordinates"></div>
             <div id="currentCoordinates"></div>
@@ -26,11 +30,18 @@
                 <option value="industrial">Industrial</option>
                 <option value="other">Other</option>
             </select>
-            <button id="triggerHarvest" disabled>Harvest Selected</button>
-            <button id="cancelHarvest" disabled>Cancel Selection</button>
+            <div id="tagWarning"></div>
+            <button class="info-button" id="triggerHarvest" disabled>
+                Harvest Selected
+            </button>
+            <button class="info-button" id="cancelHarvest" disabled>
+                Cancel Selection
+            </button>
             <div class="heading">Cumulative Tile Count</div>
             <ul id="contentList"></ul>
-            <button id="updateCount">Update Tile Count</button>
+            <button class="info-button" id="updateCount">
+                Update Tile Count
+            </button>
         </div>
         <script type="module" src="/javascript/main.js"></script>
     </body>
